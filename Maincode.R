@@ -1,10 +1,9 @@
 setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
 rm(list=ls()) 
-###################################Part 1################################
-#############################Average Tax Wedge###########################
 
-#This spreadsheet has all the income data and will show all the calculations, step-by-step.
+#This spreadsheet has all the income data and will show all the calculations, step-by-step. Data for states is taken directly from TF github
 income<-read.csv("income.csv", header = TRUE, fill = TRUE, sep = ",")
+statetax<-read.csv("statetaxdata.csv", header = TRUE, fill = TRUE, sep = ",")
 
 #############Federal Tax Wedge Function###############################
 
@@ -268,8 +267,21 @@ return(netfederalincometax+employeepayrolltax+stateincometax)
 
 }
 
-##############Tax Parameters###########
+#############State Tax Wedge Function####################
 
+#temporary variables
+fedtaxableincome<-40000
+state<-1
+StateTaxWedge<-function(income, children, married, hoh, state,fedtaxableincome){
+  
+###########State Taxable Income###################
+  
+  statetaxableincome<-fedtaxableincome
+
+}
+
+##############Tax Parameters###########
+state<-1
 children<-0
 married<-0
 hoh<-0 #This cannot be 1 if married is 1
