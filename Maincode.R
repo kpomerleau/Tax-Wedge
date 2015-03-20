@@ -1,23 +1,18 @@
-setwd("U:/Documents backup 2-3/GitHub/taxwedge")
-rm(list=ls())
+setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
+rm(list=ls()) 
 ###################################Part 1################################
 #############################Average Tax Wedge###########################
 
 #This spreadsheet has all the income data and will show all the calculations, step-by-step.
 income<-read.csv("income.csv", header = TRUE, fill = TRUE, sep = ",")
 
-#############Federal Tax Parameters###############################
+#############Federal Tax Wedge Function###############################
 
 #Load Federal Tax Parameters
 fedtax<-read.csv("fedtax.csv", header = TRUE, fill = TRUE, sep = ",")
 
-#Set Additional Parameters (Children,Married)
-children<-1
-married<-0
-hoh<-0 #This cannot be 1 if married is 1
-
-income<-300000 #test income amount
-stateincometax<-income*.06
+FederalTaxWedge<-function(income, children, married, hoh, stateincometax){
+  stateincometax<-income*.06 #temporarily in here
 
 #############Federal Taxable Income##############################
   
@@ -65,33 +60,33 @@ taxableincome<-max(0,income-deduction-personalexemption)
   
   #To make this a little easier, I don't call on the variable names in the dataset. single:3,married:4,hoh:5
 
-  while(taxableincome>fedtax[x,3+married+(hoh*2)] & !is.na(fedtax[x,3+married+(hoh*2)])){  #This uses the !is.na() code to account for the fact that there is an NA cell in the fedtax parameters
+  while(TRUE){  
     
-    if(x==1){
+    if( taxableincome < fedtax[x+1,3+married+(hoh*2)] & x < length(fedtax$incometaxrate)){
       
-      federalincometax<-federalincometax+fedtax[x,3+married+(hoh*2)]*fedtax$incometaxrates[x]
-    
-    } else {
+      federalincometax <- federalincometax + ( ( taxableincome - fedtax[x,3+married+(hoh*2)] ) * fedtax$incometaxrate[x] )
       
-      federalincometax<-federalincometax+(fedtax[x,3+married+(hoh*2)]-fedtax[x-1,3+married+(hoh*2)])*fedtax$incometaxrates[x]
-      
-    }
-    
-    x<-x+1
-  
-  } 
-
-    if(x==1){
-      
-      federalincometax<-federalincometax+taxableincome*fedtax$incometaxrates[x]
+      break
       
     } else {
       
-      federalincometax<-federalincometax+(taxableincome-fedtax[x-1,3+married+(hoh*2)])*fedtax$incometaxrates[x]
+      federalincometax <- federalincometax + fedtax$incometaxrate[x] * ( fedtax[x+1,3+married+(hoh*2)] - fedtax[x,3+married+(hoh*2)] )
+      
+      x<-x+1
+      
+    } 
+    
+    if( x == length(fedtax$incometaxrate) ) {
+      
+      federalincometax <- federalincometax + fedtax$incometaxrate[x] * ( taxableincome - fedtax[x,3+married+(hoh*2)] )
+      
+      break
       
     }
+    
+  }
 
-#Credit Calculations (CTC and EITC)
+###########Child Tax Credit##########
 
   #Child Tax Credit
 
@@ -99,47 +94,37 @@ taxableincome<-max(0,income-deduction-personalexemption)
       
       c<-children
       
-      i<-1
-      
       if (married == 0) {
-        
-        #while (i <= length(income$stateid)) {
+             
+        if(income <= fedtax$ctcphasein[1]){
           
-          if(income<=fedtax$ctcphasein[1]) {results$ctc_test[i]<-0} else 
+          ctc<-0
+          
+          } else if(income < fedtax$ctcphaseout_single[1]){
             
-            if(income<fedtax$ctcphaseout_single[1]) {ctc<-min(fedtax$ctccredit[1]*c,((income[i]-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))} else
+            ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))
+            
+            } else if(income >= fedtax$ctcphaseout_single[1]){
               
-              if(income>fedtax$ctcphaseout_single[1]) {ctc<-max(0,(fedtax$ctccredit[1]*c)-(income[i]-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1])}
-          
-          ;i<-i+1
-        
-        #}
-      
-      } else if (married == 1) {
-        
-        #while (i <= length(income$stateid)) {
-          
-          if(income<=fedtax$ctcphasein[1]) {ctc<-0} else 
-          
-            if(income<fedtax$ctcphaseout_married[1]) {ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))} else
+              ctc<-max(0,(fedtax$ctccredit[1]*c)-((income-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1]))
             
-              if(income>fedtax$ctcphaseout_married[1]) {ctc<-max(0,(fedtax$ctccredit[1]*c)-(income-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1])}
+              }
+               
+      } else if (married == 1) {
+               
+          if(income<=fedtax$ctcphasein[1]) {ctc<-0} 
           
-          ;i<-i+1
-        
-        #}
-      
+          else if(income<fedtax$ctcphaseout_married[1]) {ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))
+                                                      
+              } else if(income>fedtax$ctcphaseout_married[1]) {ctc<-max(0,(fedtax$ctccredit[1]*c)-(income-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1])}
+          
       }
     
     } else {ctc<-0}
 
-  #Earned Income Tax credit
+#####Earned Income Tax credit#######
 
     c<-min(children,3)
-    
-    #i<-1 #Counts through states
-    
-    #while (i <= length(income$stateid)) {
     
       if(married == 0){
         
@@ -174,64 +159,76 @@ taxableincome<-max(0,income-deduction-personalexemption)
         }
       
       }
-      
-      #i<-i+1
-    
-      #}
 
-#Federal Income Tax with Tax Credits
+##########Federal Income Tax with Tax Credits#############
 
-  netfederaltaxes<-federalincometax-ctc-eitc
+  netfederalincometax<-federalincometax-ctc-eitc
 
 #############Federal Payroll Taxes########################
 
-  #Employee Social Security and Medicare Payroll
-    
-    x<-1 #used as an index to count through the payroll brackets
-    
-    employeepayrolltaxes<-0
-    
-    while(income>fedtax[1,6+x] & !is.na(fedtax[1,6+x])){
-      
-      if(x==1){
-        
-        employeepayrolltaxes<-employeepayrolltaxes+fedtax[1,6+x]*fedtax[2,6+x]
-        
-      } else {
-        
-        employeepayrolltaxes<-employeepayrolltaxes+(fedtax[1,6+x]-fedtax[1,5+x])*fedtax[2,6+x]
-        
-      }
-      
-      x<-x+1
-      
-    }
-      
-      if(x==1){ #If income does not exceed the first bracket ($117,000), then:
-        
-        employeepayrolltaxes<-employeepayrolltaxes+(income*fedtax[2,6+x])
-        
-      }
+#Employee payroll taxes
 
-      if(is.na(fedtax[1,6+x])){ #If income exceeds the top bracket amount ($200,000), then:
-        
-        employeepayrolltaxes<-employeepayrolltaxes+(income-fedtax[1,5+x])*fedtax[2,6+x]
-        
-      }
+  x<-1 #An index that counts through the payroll tax brackets
+  
+  employeepayrolltax<-0
 
-  #Employer Social Security and Payroll Taxes
+  while(TRUE){  
     
-    employerpayrolltaxes<-0    
-
-    if(income<=fedtax[1,9+x]){
+    if( income < fedtax$emppayrollbracket[x+1] & x < sum(!is.na( fedtax$emppayrollbracket ) ) ){
       
-      employerpayrolltaxes<-employerpayrolltaxes+(income*fedtax[2,9+x])
+      employeepayrolltax <- employeepayrolltax + ( ( income - fedtax$emppayrollbracket[x] ) * fedtax$emppayrollrate[x] )
+      
+      break
       
     } else {
       
-      employerpayrolltaxes<-(fedtax[1,10]*fedtax[2,10])+(income-fedtax[1,10])*fedtax[2,11]
+      employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( fedtax$emppayrollbracket[x+1] - fedtax$emppayrollbracket[x] )
+      
+      x<-x+1
+      
+    } 
+    
+    if( x == sum(!is.na(fedtax$emppayrollbracket))){
+      
+      employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( income - fedtax$emppayrollbracket[x] )
+      
+      break
       
     }
+    
+  }
+
+#Employer Social Security and Payroll Taxes
+
+  x<-1 #An index that counts through the payroll tax brackets
+  
+  employerpayrolltax<-0
+
+  while(TRUE){  
+    
+    if( income < fedtax$emplrayrollbracket[x+1] & x < sum(!is.na( fedtax$emplrayrollbracket ) ) ){
+      
+      employerpayrolltax <- employerpayrolltax + ( ( income - fedtax$emplrayrollbracket[x] ) * fedtax$emplrpayrollrate[x] )
+      
+      break
+      
+    } else {
+      
+      employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( fedtax$emplrayrollbracket[x+1] - fedtax$emppayrollbracket[x] )
+      
+      x<-x+1
+      
+    } 
+    
+    if( x == sum(!is.na(fedtax$emppayrollbracket))){
+      
+      employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( income - fedtax$emppayrollbracket[x] )
+      
+      break
+      
+    }
+    
+  }
 
   #Federal Unemployment Insurance Tax
     
@@ -250,3 +247,54 @@ taxableincome<-max(0,income-deduction-personalexemption)
         #90 percent credit (minimum federal ui tax is $42, max is $420)
 
           fedui<-max(fedui*.1,fedui-stateui)
+
+######Federal Tax Wedge Output######
+
+#Possible Parameters
+
+  #income
+  #netfederalincometax
+  #stateincometax
+  #employeepayrolltax
+  #employerpayrolltax
+  #fedui
+  #taxableincome
+  #deduction
+  #personalexemption
+  #ctc
+  #eitc
+
+return(netfederalincometax+employeepayrolltax+stateincometax)
+
+}
+
+##############Tax Parameters###########
+
+children<-0
+married<-0
+hoh<-0 #This cannot be 1 if married is 1
+income<-0
+marginaltaxrate<-NULL
+averagetaxrate<-NULL
+
+#########Chart Creation############
+
+b<-1
+while (b < 500){
+  
+    
+    income[b]<-b*1000
+    
+  
+  marginaltaxrate[b]<-(FederalTaxWedge(income[b],children,married,hoh,stateincometax)-FederalTaxWedge(income[b]-1,children,married,hoh,stateincometax))/1
+  averagetaxrate[b]<-FederalTaxWedge(income[b],children,married,hoh,stateincometax)/income[b]
+
+  b<-b+1
+  
+}
+
+plot(income,marginaltaxrate)
+
+mat<-cbind(income,marginaltaxrate)
+
+write.table(mat,sep=",",file="test.txt")
