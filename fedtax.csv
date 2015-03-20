@@ -1,8 +1,8 @@
-standard_deduction,personal_exemption,singlebracket,marriedbracket,hohbracket,incometaxrates,emp_payroll1,emp_payroll2,emp_payroll3,emplr_payroll1,emplr_payroll2,ui,ctccredit,ctcphasein,ctcphaseinrate,ctcphaseout_single,ctcphaseout_married,ctcphaseoutrate,eitc_children,eitc_max,eitc_threshold,eitc_phaseout_single,eitc_phaseout_married,eitc_maxincome_single,eitc_maxincome_married,pep_pease_threshold,pep_phaseout
-6200,3950,0,0,0,0.1,117000,200000,,117000,,7000,1000,3000,0.15,75000,110000,0.05,0,496,6480,8110,13540,14590,20020,254200,0.02
-12400,,9075,18150,12950,0.15,0.0765,0.0145,0.0235,0.0765,0.0145,0.06,,,,,,,1,3305,9720,17830,23260,38511,43941,305050,
-9100,,36900,73800,49400,0.25,,,,,,,,,,,,,2,5460,13650,17830,23260,43756,49186,279650,
-,,89350,148850,127550,0.28,,,,,,,,,,,,,3,6143,13650,17830,23260,46997,52427,,
-,,186350,226850,206600,0.33,,,,,,,,,,,,,,,,,,,,,
-,,405100,405100,405100,0.35,,,,,,,,,,,,,,,,,,,,,
-,,406750,457600,432200,0.396,,,,,,,,,,,,,,,,,,,,,
+standard_deduction,personal_exemption,singlebracket,marriedbracket,hohbracket,incometaxrates,emppayrollbracket,emppayrollrate,emplrayrollbracket,emplrpayrollrate,ui,ctccredit,ctcphasein,ctcphaseinrate,ctcphaseout_single,ctcphaseout_married,ctcphaseoutrate,eitc_children,eitc_max,eitc_threshold,eitc_phaseout_single,eitc_phaseout_married,eitc_maxincome_single,eitc_maxincome_married,pep_pease_threshold,pep_phaseout
+6200,3950,0,0,0,0.1,0,0.0765,0,0.0765,7000,1000,3000,0.15,75000,110000,0.05,0,496,6480,8110,13540,14590,20020,254200,0.02
+12400,,9075,18150,12950,0.15,117000,0.0145,117000,0.0145,0.06,,,,,,,1,3305,9720,17830,23260,38511,43941,305050,
+9100,,36900,73800,49400,0.25,200000,0.0235,,,,,,,,,,2,5460,13650,17830,23260,43756,49186,279650,
+,,89350,148850,127550,0.28,,,,,,,,,,,,3,6143,13650,17830,23260,46997,52427,,
+,,186350,226850,206600,0.33,,,,,,,,,,,,,,,,,,,,
+,,405100,405100,405100,0.35,,,,,,,,,,,,,,,,,,,,
+,,406750,457600,432200,0.396,,,,,,,,,,,,,,,,,,,,
