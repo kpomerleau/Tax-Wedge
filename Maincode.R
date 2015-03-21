@@ -1,4 +1,4 @@
-setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
+setwd("C:/Users/Kyle/Documents/GitHub/Tax-Wedge")
 rm(list=ls()) 
 
 #This spreadsheet has all the income data and will show all the calculations, step-by-step. Data for states is taken directly from TF github
@@ -270,22 +270,61 @@ return(netfederalincometax+employeepayrolltax+stateincometax)
 #############State Tax Wedge Function####################
 
 #temporary variables
-fedtaxableincome<-40000
-state<-1
-StateTaxWedge<-function(income, children, married, hoh, state,fedtaxableincome){
+StateTaxWedge<-function(income, children, married, hoh, state,fedtaxableincome,eitc){
   
+########Grab State Parameters Needed##############
+
+  stateparam<-statetax[statetax$id == state,]
+  
+
 ###########State Taxable Income###################
   
-  statetaxableincome<-fedtaxableincome
+  #Standard Deduction
+
+    if(married == 1){ standarddeduction <- stateparam$deductionmarried[1]
+                     
+      } else if(hoh == 1){ standardeduction <- stateparam$deductionmarried[1]
+    
+      } else { standarddeduction <- stateparam$deductionsingle[1]
+    
+      }
+    
+    #Special state specific adjustments to the standard deduction
+
+      #none yet.
+
+  #Personal Exemption
+
+    if(married == 1){ personalexemption <- stateparam$personalexemptionsingle[1]
+                      
+      } else { personalexemption <- stateparam$deductionsingle[1]
+             
+      }
+
+      personalexemption<-personalexemption+(stateparam$personalexemptiondependent[1]*children)
+  
+    #State specific adjustments to the personal exemption  
+
+      #none yet
+
+  statetaxableincome<-income-standarddeduction-personalexemption
+
+##############State Income Tax#######################
+
+  while(TRUE){
+    
+    
+    
+  }
 
 }
 
 ##############Tax Parameters###########
-state<-1
+state<-statetax$id[1]
 children<-0
 married<-0
 hoh<-0 #This cannot be 1 if married is 1
-income<-0
+income<-20000
 marginaltaxrate<-NULL
 averagetaxrate<-NULL
 
