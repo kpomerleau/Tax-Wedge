@@ -1,4 +1,5 @@
-setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
+setwd("C:/Users/Kyle/Documents/GitHub/Tax-Wedge")
+#setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
 rm(list=ls()) 
 
 #This spreadsheet has all the income data and will show all the calculations, step-by-step.
@@ -591,7 +592,7 @@ return(netfederalincometax+employeepayrolltax+stateincometax)
       
       #Final Calculation
       
-        statetaxableincome<-income-standarddeduction-personalexemption
+        statetaxableincome<-max(0,income-standarddeduction-personalexemption)
       
       return(statetaxableincome)
       
@@ -918,13 +919,13 @@ TotalTaxBurden<-function(income, children, married, hoh){
   
     taxburden<-stateincometax+federalincometax+employeepayrolltax
   
-  return(stateincometax)
+  return(taxburden)
 
 }
 
 ##############Tax Parameters###########
 
-state<-6
+state<-36
 children<-0
 married<-0
 hoh<-0 #This cannot be 1 if married is 1
@@ -937,10 +938,10 @@ averagetaxrate<-NULL
 taxbill<-NULL
 income<-NULL
 b<-1
-while (b < 1000){
+while (b < 150){
   
     
-    income[b]<-b*1000
+    income[b]<-b*10000
     
   taxbill[b]<-TotalTaxBurden(income[b],children,married,hoh)
   marginaltaxrate[b]<-(TotalTaxBurden(income[b],children,married,hoh)-TotalTaxBurden(income[b]-1,children,married,hoh))/1
@@ -950,8 +951,8 @@ while (b < 1000){
   
 }
 
-plot(income,taxbill)
-
+plot(income,marginaltaxrate)
+mat<-NULL
 mat<-cbind(income,marginaltaxrate,averagetaxrate,taxbill)
 
 write.table(mat,sep=",",file="test.txt")
