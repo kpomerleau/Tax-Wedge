@@ -183,15 +183,15 @@
     
     while(TRUE){  
       
-      if( income < fedtax$emppayrollbracket[x+1] & x < sum(!is.na( fedtax$emppayrollbracket ) ) ){
+      if( income < fedtax$emppayrollbracket[x+1]*(1+married) & x < sum(!is.na( fedtax$emppayrollbracket ) ) ){
         
-        employeepayrolltax <- employeepayrolltax + ( ( income - fedtax$emppayrollbracket[x] ) * fedtax$emppayrollrate[x] )
+        employeepayrolltax <- employeepayrolltax + ( ( income - fedtax$emppayrollbracket[x]*(1+married) ) * fedtax$emppayrollrate[x] )
         
         break
         
       } else {
         
-        employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( fedtax$emppayrollbracket[x+1] - fedtax$emppayrollbracket[x] )
+        employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( fedtax$emppayrollbracket[x+1]*(1+married) - fedtax$emppayrollbracket[x]*(1+married) )
         
         x<-x+1
         
@@ -199,7 +199,7 @@
       
       if( x == sum(!is.na(fedtax$emppayrollbracket))){
         
-        employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( income - fedtax$emppayrollbracket[x] )
+        employeepayrolltax <- employeepayrolltax + fedtax$emppayrollrate[x] * ( income - fedtax$emppayrollbracket[x]*(1+married) )
         
         break
         
@@ -221,15 +221,15 @@
     
     while(TRUE){  
       
-      if( income < fedtax$emplrayrollbracket[x+1] & x < sum(!is.na( fedtax$emplrayrollbracket ) ) ){
+      if( income < fedtax$emplrayrollbracket[x+1]*(1+married) & x < sum(!is.na( fedtax$emplrayrollbracket ) ) ){
         
-        employerpayrolltax <- employerpayrolltax + ( ( income - fedtax$emplrayrollbracket[x] ) * fedtax$emplrpayrollrate[x] )
+        employerpayrolltax <- employerpayrolltax + ( ( income - fedtax$emplrayrollbracket[x]*(1+married) ) * fedtax$emplrpayrollrate[x] )
         
         break
         
       } else {
         
-        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( fedtax$emplrayrollbracket[x+1] - fedtax$emppayrollbracket[x] )
+        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( fedtax$emplrayrollbracket[x+1]*(1+married) - fedtax$emppayrollbracket[x]*(1+married) )
         
         x<-x+1
         
@@ -237,7 +237,7 @@
       
       if( x == sum(!is.na(fedtax$emppayrollbracket))){
         
-        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( income - fedtax$emppayrollbracket[x] )
+        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( income - fedtax$emppayrollbracket[x]*(1+married) )
         
         break
         
@@ -253,13 +253,13 @@
   
     FedUI<-function(income,married,stateui){
     
-    if(income<=fedtax$ui[1]){
+    if(income<=fedtax$ui[1]*(1+married)){
       
       fedui<-fedtax$ui[2]*income
       
     } else {
       
-      fedui<-fedtax$ui[2]*fedtax$ui[1]
+      fedui<-fedtax$ui[2]*fedtax$ui[1]*(1+married)
       
     }
     
@@ -301,25 +301,72 @@
     
     #Special state specific adjustments to the standard deduction
     
-    #none yet.
+      #Alabama
+        
+        #Alabama's Standard Deduction is on a sliding scale between $2500 and $2000 
+        #($7500 and $4000 married) between $20500 and $30,000.
+          
+        if(stateparam$stateName[1] == "Alabama" & income >= 20500){
+          
+          if(married == 0){
+          
+            standarddeduction <- max(2000,2500-((income-20500)*((2500-2000)/9500)))
+          
+          } else if (married == 1){
+            
+            standarddeduction <- max(4000,7500-((income-20500)*((7500-4000)/9500)))
+            
+          } else if (hoh == 1){
+            
+            standarddeduction <- max(2000,4700-((income-20500)*((4700-2000)/9500)))
+            
+          }
+        
+        } 
     
     #Personal Exemption
-    
-    if(married == 1){ 
       
-      personalexemption <- stateparam$personalexemptionsingle[1]
-      
-    } else { 
-      
-      personalexemption <- stateparam$deductionsingle[1]
-      
-    }
+      #For taxpayer and spouse
     
-    personalexemption <- personalexemption + ( stateparam$personalexemptiondependent[1] * children)
+        if(married == 1){ 
+          
+          personalexemption <- stateparam$personalexemptionmarried[1]
+          
+        } else if (married == 0){ 
+          
+          personalexemption <- stateparam$personalexemptionsingle[1]
+          
+        } else if (hoh == 1){
+          
+          personalexemption <- stateparam$personalexemptionhoh[1]
+          
+        }
     
-    #State specific adjustments to the personal exemption  
+      #Dependent Exemption
+      
+        dependentexemption <- ( stateparam$personalexemptiondependent[1] * children )
     
-    #none yet
+      #State specific adjustments to the personal exemption  
+    
+        #Alabama
+          
+          if(stateparam$stateName[1] == "Alabama"){  
+            
+            if(income > 20000 & income <= 100000){
+              
+              dependentexemption <- 500
+              
+            } else if (income>100000){
+              
+              dependentexemption <- 300
+              
+            }
+            
+          }
+      
+      #Final Calculation of personal exemption
+            
+        personalexemption <- personalexemption+dependentexemption
     
     #Federal Income Tax Deduction (For Specific States)
     
@@ -327,7 +374,7 @@
     
     #Final Calculation
     
-    statetaxableincome<-max(0,income-standarddeduction-personalexemption)
+    statetaxableincome<-max(0,income-standarddeduction-personalexemption-federalincometax)
     
     return(statetaxableincome)
     

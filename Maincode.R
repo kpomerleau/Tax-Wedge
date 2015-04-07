@@ -59,7 +59,7 @@ TotalTaxBurden<-function(income, children, married, hoh){
         
       } else {
         
-        stateincometax<-max(0,stateincometax-personalcredit-eitc)
+        stateincometax<-max(0,stateincometax-personalcredit-stateeitc)
         
       }
 
@@ -75,21 +75,61 @@ TotalTaxBurden<-function(income, children, married, hoh){
 
     ctc<-FedCTC(income,children,married)
 
-  #Federal Income Tax
+  #Step 10: Federal Income Tax
   
     federalincometax<-federalincometax-ctc-eitc
   
-  #Reserved for Recalculating fed deductability
+  #Step 11: Accounting for deductability of federal income taxes
+    
+    #If a state has federal deductability, a second round of calculations need to happen
+    #to adjust both federal and state taxable income
+  
+    if(stateparam$feddeduct[1] == 1){
+      
+      #state taxable income including federal tax payments
+      
+        statetaxableincome<-StateTaxableIncome(income,children,married,hoh,federalincometax,stateparam)
+      
+      #state income tax
+      
+        stateincometax<-StateIncomeTax(statetaxableincome,married,hoh,stateparam)
+      
+      #total state income tax. No need to recalculate personal credit or EITC. They have nothing to do
+      #with federal deductability
+      
+        if(stateparam$eitcrefund[1] == 1){
+          
+          stateincometax<-stateincometax-personalcredit-stateeitc
+          
+        } else {
+          
+          stateincometax<-max(0,stateincometax-personalcredit-stateeitc)
+          
+        }
+      
+      #Federal Taxable income after adjusted state income tax
+      
+        taxableincome<-FedTaxableIncome(income, children, married, hoh, stateincometax)
+      
+      #Federal Income tax after state adjustment
+      
+        federalincometax<-FedIncomeTax(taxableincome,married,hoh)
+      
+      #Fed Tax plus credits
+      
+        federalincometax<-federalincometax-ctc-eitc
+      
+    }
 
-  #Payroll Taxes
+  #Step 12: Payroll Taxes
 
     employeepayrolltax<-FedEmployeePayroll(income,married)
   
-  #Total Tax Burden
+  #Step 13: Total Tax Burden
   
     taxburden<-stateincometax+federalincometax+employeepayrolltax
   
-  return(federalincometax)
+  return(taxburden)
 
 }
 
@@ -100,7 +140,7 @@ children<-0
 married<-0
 hoh<-0 #This cannot be 1 if married is 1
 income<-37000
-
+stateparam<-StateParameters(state)
 #########Chart Creation############
 
 marginaltaxrate<-NULL
@@ -121,7 +161,15 @@ while (b < 1000){
   
 }
 
-plot(income,marginaltaxrate)
+options(scipen=999) #Get's rid of scientific notation, which is useless in the context of dollars
+
+plot(income,marginaltaxrate, log = 'x',
+     main=paste("Marginal Tax Rate by Income Level,",toString(stateparam$stateName[1])),
+     xlab="Log Income", ylab="Marginal Tax Rate",
+     xaxt = 'n', yaxt = 'n')
+axis(1, at=axTicks(1), labels=sprintf("$%s", axTicks(1)),cex.axis=.75)
+axis(2, at=axTicks(2), labels=sprintf(paste("%x","%%"), axTicks(2)*100),cex.axis=.75)
+
 mat<-NULL
 mat<-cbind(income,marginaltaxrate,averagetaxrate,taxbill)
 
