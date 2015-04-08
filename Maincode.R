@@ -1,7 +1,7 @@
 
-setwd("C:/Users/Kyle/Documents/GitHub/Tax-Wedge")
+#setwd("C:/Users/Kyle/Documents/GitHub/Tax-Wedge")
 
-#setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
+setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
 
 rm(list=ls()) 
 
@@ -129,20 +129,28 @@ TotalTaxBurden<-function(income, children, married, hoh){
   
     employerpayrolltax<-FedEmployerPayroll(income,married)
   
+  #Step 14: State Unemployment insurance Tax
+  
+    stateui<-StateUI(income,married,stateparam)
+  
+  #Step 15: Federak Unemployment Insurance Tax
+  
+    federalui<-FedUI(income, married, stateui)
+  
   #Step 14: Total Tax Burden
   
     taxburden<-stateincometax+federalincometax+employeepayrolltax+employerpayrolltax
   
-  return(taxburden)
+  return(stateincometax)
 
 }
 
 ##############Tax Parameters###########
 
-state<-2
-children<-0
+state<-1
+children<-1
 married<-0
-hoh<-0 #This cannot be 1 if married is 1
+hoh<-1 #This cannot be 1 if married is 1
 income<-37000
 stateparam<-StateParameters(state)
 #########Chart Creation############
@@ -156,12 +164,12 @@ b<-1
 while (b < 500){
   
     
-    income[b]<-b*100
+    income[b]<-b*1000
     grossup[b]<-FedEmployerPayroll(income[b],married)
     
   taxbill[b]<-TotalTaxBurden(income[b],children,married,hoh)
-  marginaltaxrate[b]<-(TotalTaxBurden(income[b],children,married,hoh)-TotalTaxBurden(income[b]-1,children,married,hoh))/(1+(FedEmployerPayroll(income[b],married)-FedEmployerPayroll(income[b]-1,married)))
-  averagetaxrate[b]<-TotalTaxBurden(income[b],children,married,hoh)/(income[b]+grossup[b])
+  marginaltaxrate[b]<-(TotalTaxBurden(income[b],children,married,hoh)-TotalTaxBurden(income[b]-1,children,married,hoh))/(1+(0*(FedEmployerPayroll(income[b],married)-FedEmployerPayroll(income[b]-1,married))))
+  averagetaxrate[b]<-TotalTaxBurden(income[b],children,married,hoh)/(income[b])
 
   b<-b+1
   
@@ -171,9 +179,10 @@ options(scipen=999) #Get's rid of scientific notation, which is useless in the c
 
 plot(income,marginaltaxrate, 
      main=paste("Marginal Tax Rate by Income Level,",toString(stateparam$stateName[1])),
+     log = "x",
      xlab="Income", ylab="Marginal Tax Rate",
      xaxt = 'n',
-     ylim = c(min(marginaltaxrate),.6))
+     ylim = c(min(marginaltaxrate),max(marginaltaxrate)))
 axis(1, at=axTicks(1), labels=sprintf("$%s", axTicks(1)),cex.axis=.75)
 
 mat<-NULL

@@ -390,14 +390,22 @@
     
     while(TRUE){
       
-      if(married == 1){ #Calculates Income Pre-Credit income tax for married couples
+      #Calculates Income Pre-Credit income tax for married couples
+      
+      if(married == 1){
         
-        if( statetaxableincome < stateparam$marriedbracket[x+1] & x < length(stateparam$marriedbracket)){
+        if( statetaxableincome < stateparam$marriedbracket[x+1] & x < length(stateparam$marriedbracket)) {
           
           stateincometax <- stateincometax + ( ( statetaxableincome - stateparam$marriedbracket[x] ) * stateparam$marriedrate[x] )
           
           break
           
+        } else if( x == length(stateparam$marriedbracket) ) {
+          
+          stateincometax <- stateincometax + stateparam$marriedrate[x] * ( statetaxableincome - stateparam$marriedbracket[x] )
+          
+          break
+        
         } else {
           
           stateincometax <- stateincometax + stateparam$marriedrate[x] * ( stateparam$marriedbracket[x+1] - stateparam$marriedbracket[x] )
@@ -406,19 +414,19 @@
           
         } 
         
-        if( x == length(stateparam$marriedbracket) ) {
-          
-          stateincometax <- stateincometax + stateparam$marriedrate[x] * ( statetaxableincome - stateparam$marriedbracket[x] )
-          
-          break
-          
-        }
-        
-      } else if (married == 0) { #Calculates Pre-Credit income tax for singles
+      #Calculates Income Pre-Credit income tax for married couples
+                
+      } else if(married == 0){ 
         
         if( statetaxableincome < stateparam$singlebracket[x+1] & x < length(stateparam$singlebracket)){
           
           stateincometax <- stateincometax + ( ( statetaxableincome - stateparam$singlebracket[x] ) * stateparam$singlerate[x] )
+          
+          break
+          
+        } else if( x == length(stateparam$singlebracket) ) {
+          
+          stateincometax <- stateincometax + stateparam$singlerate[x] * ( statetaxableincome - stateparam$singlebracket[x] )
           
           break
           
@@ -430,13 +438,29 @@
           
         } 
         
-        if( x == length(stateparam$marriedbracket) ) {
+      #Calculates Income Pre-Credit income tax for Head of Households
+               
+      } else if (hoh == 1){
+        
+        if( statetaxableincome < stateparam$hohbracket[x+1] & x < length(stateparam$hohbracket)){
           
-          stateincometax <- stateincometax + stateparam$singlerate[x] * ( statetaxableincome - stateparam$singlebracket[x] )
+          stateincometax <- stateincometax + ( ( statetaxableincome - stateparam$hohbracket[x] ) * stateparam$hohrate[x] )
           
           break
           
-        }
+        } else if( x == length(stateparam$hohbracket) ) {
+          
+          stateincometax <- stateincometax + stateparam$hohrate[x] * ( statetaxableincome - stateparam$hohbracket[x] )
+          
+          break
+          
+        } else {
+          
+          stateincometax <- stateincometax + stateparam$hohrate[x] * ( stateparam$hohbracket[x+1] - stateparam$hohbracket[x] )
+          
+          x<-x+1
+          
+        } 
         
       }
       
@@ -482,7 +506,18 @@
   
     StateUI<-function(income,married,stateparam){
     
-    
+      if(income<=stateparam$uibase[1]*(1+married)){
+        
+        stateui<-stateparam$uirate[1]*income
+        
+      } else {
+        
+        stateui<-stateparam$uirate[1]*stateparam$uibase[1]*(1+married)
+        
+      }
+      
+      return(stateui)
+      
     
   }
   
