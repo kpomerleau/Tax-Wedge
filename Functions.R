@@ -229,15 +229,15 @@
         
       } else {
         
-        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( fedtax$emplrayrollbracket[x+1]*(1+married) - fedtax$emppayrollbracket[x]*(1+married) )
+        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( fedtax$emplrayrollbracket[x+1]*(1+married) - fedtax$emplrayrollbracket[x]*(1+married) )
         
         x<-x+1
         
       } 
       
-      if( x == sum(!is.na(fedtax$emppayrollbracket))){
+      if( x == sum(!is.na(fedtax$emplrayrollbracket))){
         
-        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( income - fedtax$emppayrollbracket[x]*(1+married) )
+        employerpayrolltax <- employerpayrolltax + fedtax$emplrpayrollrate[x] * ( income - fedtax$emplrayrollbracket[x]*(1+married) )
         
         break
         
