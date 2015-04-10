@@ -9,7 +9,7 @@
     
     if(income>fedtax$pep_pease_threshold[1+married+(hoh*2)]){
       
-      personalexemption<-max(0,(1-( ceiling(((income-fedtax$pep_pease_threshold[1+married+(hoh*2)])/2500)) *(.02)))*(fedtax$personal_exemption[1]*(1+children+married)))
+      personalexemption<-max(0,(1-( ((income-fedtax$pep_pease_threshold[1+married+(hoh*2)])/2500) *(.02)))*(fedtax$personal_exemption[1]*(1+children+married)))
       
     } else {
       
@@ -151,7 +151,7 @@
           
         } else if(income > fedtax$ctcphaseout_single[1]){
           
-          ctc<-max(0,(fedtax$ctccredit[1]*c)-( (ceiling((income-fedtax$ctcphaseout_single[1])*(1/1000))*1000) * fedtax$ctcphaseoutrate[1]) )
+          ctc<-max(0,(fedtax$ctccredit[1]*c)-( (income-fedtax$ctcphaseout_single[1]) * fedtax$ctcphaseoutrate[1]) )
           
         }
         
@@ -167,7 +167,7 @@
                                                        
         } else if(income > fedtax$ctcphaseout_married[1]) {
           
-          ctc<-max(0,(fedtax$ctccredit[1]*c)- (ceiling((income-fedtax$ctcphaseout_married[1])*(1/1000))*1000) *fedtax$ctcphaseoutrate[1])
+          ctc<-max(0,(fedtax$ctccredit[1]*c)- (income-fedtax$ctcphaseout_married[1]) *fedtax$ctcphaseoutrate[1])
         
         }
         

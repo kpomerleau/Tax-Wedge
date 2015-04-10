@@ -141,16 +141,16 @@ TotalTaxBurden<-function(income, children, married, hoh){
   
     taxburden<-stateincometax+federalincometax+employeepayrolltax+employerpayrolltax
   
-  return(stateincometax)
+  return(federalincometax)
 
 }
 
 ##############Tax Parameters###########
 
-state<-1
+state<-4
 children<-1
 married<-0
-hoh<-1 #This cannot be 1 if married is 1
+hoh<-0 #This cannot be 1 if married is 1
 income<-37000
 stateparam<-StateParameters(state)
 #########Chart Creation############
@@ -168,7 +168,7 @@ while (b < 500){
     grossup[b]<-FedEmployerPayroll(income[b],married)
     
   taxbill[b]<-TotalTaxBurden(income[b],children,married,hoh)
-  marginaltaxrate[b]<-(TotalTaxBurden(income[b],children,married,hoh)-TotalTaxBurden(income[b]-1,children,married,hoh))/(1+(0*(FedEmployerPayroll(income[b],married)-FedEmployerPayroll(income[b]-1,married))))
+  marginaltaxrate[b]<-(TotalTaxBurden(income[b],children,married,hoh)-TotalTaxBurden(income[b]-1,children,married,hoh))/1
   averagetaxrate[b]<-TotalTaxBurden(income[b],children,married,hoh)/(income[b])
 
   b<-b+1
@@ -179,7 +179,7 @@ options(scipen=999) #Get's rid of scientific notation, which is useless in the c
 
 plot(income,marginaltaxrate, 
      main=paste("Marginal Tax Rate by Income Level,",toString(stateparam$stateName[1])),
-     log = "x",
+     #log = "x",
      xlab="Income", ylab="Marginal Tax Rate",
      xaxt = 'n',
      ylim = c(min(marginaltaxrate),max(marginaltaxrate)))
