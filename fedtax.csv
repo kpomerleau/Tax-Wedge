@@ -1,8 +1,8 @@
-standard_deduction,personal_exemption,singlebracket,marriedbracket,hohbracket,incometaxrates,emppayrollbracket,emppayrollrate,emplrayrollbracket,emplrpayrollrate,ui,ctccredit,ctcphasein,ctcphaseinrate,ctcphaseout_single,ctcphaseout_married,ctcphaseoutrate,eitc_children,eitc_max,eitc_threshold,eitc_phaseout_single,eitc_phaseout_married,eitc_maxincome_single,eitc_maxincome_married,pep_pease_threshold,pep_phaseout
-6300,4000,0,0,0,0.1,0,0.0765,0,0.0765,7000,1000,3000,0.15,75000,110000,0.05,0,503,6580,8240,13760,14820,20330,258250,0.02
-12600,,9225,18450,13150,0.15,117000,0.0145,117000,0.0145,0.06,,,,,,,1,3359,9880,18110,23630,39131,44651,309900,
-9250,,37450,74900,50200,0.25,200000,0.0235,,,,,,,,,,2,5548,13870,18110,23630,44454,49974,284050,
-,,90750,151200,129600,0.28,,,,,,,,,,,,3,6242,13870,18110,23630,47747,53267,,
-,,189300,230450,209850,0.33,,,,,,,,,,,,,,,,,,,,
-,,411500,411500,411500,0.35,,,,,,,,,,,,,,,,,,,,
-,,413200,464850,439000,0.396,,,,,,,,,,,,,,,,,,,,
+standard_deduction,personal_exemption,singlebracket,marriedbracket,hohbracket,incometaxrates,emppayrollbracket,emppayrollrate,emplrayrollbracket,emplrpayrollrate,medsurtaxsinglebracket,medsurtaxmarriedbracket,medsurtaxrate,ui,ctccredit,ctcphasein,ctcphaseinrate,ctcphaseout_single,ctcphaseout_married,ctcphaseoutrate,eitc_children,eitc_max,eitc_threshold,eitc_phaseout_single,eitc_phaseout_married,eitc_maxincome_single,eitc_maxincome_married,pep_pease_threshold,pep_phaseout,amtexemptionsingle,amtexemptionmarried,amtbracket,amtrate,amtphaseoutsingle,amtphaseoutmarried
+6300,4000,0,0,0,0.1,0,0.0765,0,0.0765,0,0,0,7000,1000,3000,0.15,75000,110000,0.05,0,503,6580,8240,13760,14820,20330,258250,0.02,53600,83400,0,0.26,119200,158900
+12600,,9225,18450,13150,0.15,117000,0.0145,117000,0.0145,200000,250000,0.009,0.06,,,,,,,1,3359,9880,18110,23630,39131,44651,309900,,,,185400,0.28,,
+9250,,37450,74900,50200,0.25,,,,,,,,,,,,,,,2,5548,13870,18110,23630,44454,49974,284050,,,,,,,
+,,90750,151200,129600,0.28,,,,,,,,,,,,,,,3,6242,13870,18110,23630,47747,53267,,,,,,,,
+,,189300,230450,209850,0.33,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,411500,411500,411500,0.35,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,413200,464850,439000,0.396,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

@@ -9,7 +9,7 @@
     
     if(income>fedtax$pep_pease_threshold[1+married+(hoh*2)]){
       
-      personalexemption<-max(0,(1-(((income-fedtax$pep_pease_threshold[1+married+(hoh*2)])/2500)*.02)))*(fedtax$personal_exemption[1]*(1+children+married))
+      personalexemption<-max(0,(1-( ceiling(((income-fedtax$pep_pease_threshold[1+married+(hoh*2)])/2500)) *(.02)))*(fedtax$personal_exemption[1]*(1+children+married)))
       
     } else {
       
@@ -145,27 +145,39 @@
           
           ctc<-0
           
-        } else if(income < fedtax$ctcphaseout_single[1]){
+        } else if(income <= fedtax$ctcphaseout_single[1]){
           
           ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))
           
-        } else if(income >= fedtax$ctcphaseout_single[1]){
+        } else if(income > fedtax$ctcphaseout_single[1]){
           
-          ctc<-max(0,(fedtax$ctccredit[1]*c)-((income-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1]))
+          ctc<-max(0,(fedtax$ctccredit[1]*c)-( (ceiling((income-fedtax$ctcphaseout_single[1])*(1/1000))*1000) * fedtax$ctcphaseoutrate[1]) )
           
         }
         
       } else if (married == 1) {
         
-        if(income<=fedtax$ctcphasein[1]) {ctc<-0} 
+        if(income <= fedtax$ctcphasein[1]) {
+          
+          ctc<-0
         
-        else if(income<fedtax$ctcphaseout_married[1]) {ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))
+        } else if(income <= fedtax$ctcphaseout_married[1]) {
+          
+          ctc<-min(fedtax$ctccredit[1]*c,((income-fedtax$ctcphasein[1])*fedtax$ctcphaseinrate[1]))
                                                        
-        } else if(income>fedtax$ctcphaseout_married[1]) {ctc<-max(0,(fedtax$ctccredit[1]*c)-(income-fedtax$ctcphaseout_single[1])*fedtax$ctcphaseoutrate[1])}
+        } else if(income > fedtax$ctcphaseout_married[1]) {
+          
+          ctc<-max(0,(fedtax$ctccredit[1]*c)- (ceiling((income-fedtax$ctcphaseout_married[1])*(1/1000))*1000) *fedtax$ctcphaseoutrate[1])
+        
+        }
         
       }
       
-    } else {ctc<-0}
+    } else {
+      
+      ctc<-0
+    
+    }
     
     return(ctc)
     
@@ -248,6 +260,76 @@
     return(employerpayrolltax)
     
   }
+
+  #Medicare Surtax
+
+    MedSurtax<-function(income,married){
+        
+      x<-1 #An index that counts through the tax brackets
+      
+      medsurtax<-0
+      
+      #To make this a little easier, I don't call on the variable names in the dataset. single:3,married:4,hoh:5
+      
+      while(TRUE){  
+     
+        if(married == 0){
+          
+          if( income < fedtax$medsurtaxsinglebracket[x+1] & x < sum(!is.na(fedtax$medsurtaxsinglebracket))){
+            
+            medsurtax <- medsurtax + ( ( income - fedtax$medsurtaxsinglebracket[x] ) * fedtax$medsurtaxrate[x] )
+            
+            break
+            
+          } else {
+            
+            medsurtax <- medsurtax + fedtax$medsurtaxrate[x] * ( fedtax$medsurtaxsinglebracket[x+1] - fedtax$medsurtaxsinglebracket[x] )
+            
+            x<-x+1
+            
+          } 
+          
+          if( x == sum(!is.na(fedtax$medsurtaxsinglebracket)) ) {
+            
+            medsurtax <- medsurtax + fedtax$medsurtaxrate[x] * ( income - fedtax$medsurtaxsinglebracket[x] )
+            
+            break
+            
+          }
+          
+        } else 
+          
+        if(married == 1){
+          
+          if( income < fedtax$medsurtaxmarriedbracket[x+1] & x < sum(!is.na(fedtax$medsurtaxmarriedbracket))){
+            
+            medsurtax <- medsurtax + ( ( income - fedtax$medsurtaxmarriedbracket[x] ) * fedtax$medsurtaxrate[x] )
+            
+            break
+            
+          } else {
+            
+            medsurtax <- medsurtax + fedtax$medsurtaxrate[x] * ( fedtax$medsurtaxmarriedbracket[x+1] - fedtax$medsurtaxmarriedbracket[x] )
+            
+            x<-x+1
+            
+          } 
+          
+          if( x == sum(!is.na(fedtax$medsurtaxmarriedbracket)) ) {
+            
+            medsurtax <- medsurtax + fedtax$medsurtaxrate[x] * ( income - fedtax$medsurtaxmarriedbracket[x] )
+            
+            break
+            
+          }
+          
+        }      
+      
+      }
+      
+      return(medsurtax)   
+      
+    }
   
   #Federal UI Tax
   
@@ -270,6 +352,54 @@
     return(fedui)
     
   }
+
+  #Alternative Minimum Tax
+
+    AMT<-function(income,married){
+      
+      if(married == 1){
+        
+        amti <- income - max(0,(fedtax$amtexemptionmarried[1] - max(0,(income - fedtax$amtphaseoutmarried[1])*.25)))
+        
+      } else {
+        
+        amti<- income - max(0,(fedtax$amtexemptionsingle[1] - max (0,(income - fedtax$amtphaseoutsingle[1])*.25)))
+        
+      }
+      
+      x<-1
+      
+      amt<-0
+        
+      while(TRUE){
+        
+        if( amti < fedtax$amtbracket[x+1] & x < sum(!is.na(fedtax$amtbracket))){
+          
+          amt <- amt + ( ( amti - fedtax$amtbracket[x] ) * fedtax$amtrate[x] )
+          
+          break
+          
+        } else {
+          
+          amt <- amt + fedtax$amtrate[x] * ( fedtax$amtbracket[x+1] - fedtax$amtbracket[x] )
+          
+          x<-x+1
+          
+        } 
+        
+        if( x == sum(!is.na(fedtax$amtbracket)) ) {
+          
+          amt <- amt + fedtax$amtrate[x] * ( amti - fedtax$amtbracket[x] )
+          
+          break
+          
+        }         
+        
+      }  
+      
+      return(amt)
+      
+    }
 
 ################State Tax Functions##############################
 
