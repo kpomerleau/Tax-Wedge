@@ -179,7 +179,7 @@ options(scipen=999) #Get's rid of scientific notation, which is useless in the c
 
 plot(income,marginaltaxrate, 
      main=paste("Marginal Tax Rate by Income Level,",toString(stateparam$stateName[1])),
-     #log = "x",
+     log = "x",
      xlab="Income", ylab="Marginal Tax Rate",
      xaxt = 'n',
      ylim = c(min(marginaltaxrate),max(marginaltaxrate)))
