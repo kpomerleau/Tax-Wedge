@@ -4,6 +4,8 @@ setwd("C:/Users/kep/Documents/GitHub/Tax-Wedge")
 rm(list=ls()) 
 
 #Load Parameters that are saved in csv files.
+
+  source("parametersetup.R")
   
   income<-read.csv("income.csv", header = TRUE, fill = TRUE, sep = ",")
   
